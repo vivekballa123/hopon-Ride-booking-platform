@@ -20,30 +20,30 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength: [5, 'Email must be at least 5bcharacters long'],
     },
-    password:{
-        type:String,
-        required:true,
-        select:false,
+    password: {
+        type: String,
+        required: true,
+        select: false,
     },
-    socketId:{
-        type:String,
+    socketId: {
+        type: String,
     }
 
 })
 
-userSchema.methods.generateAuthToken = function(){
-    const token = jwt.sign({_id:this._id},process.env.JWT_SECRET)
+userSchema.methods.generateAuthToken = function () {
+    const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET, { expiresIn: '24h' })
     return token;
 }
 
-userSchema.methods.comparePassword = async function(password){
-    return await bcrypt.compare(password,this.password)
+userSchema.methods.comparePassword = async function (password) {
+    return await bcrypt.compare(password, this.password)
 }
 
-userSchema.statics.hashPassword = function(password) {
+userSchema.statics.hashPassword = function (password) {
     return bcrypt.hash(password, 10);
 };
 
-const userModel = mongoose.model('user',userSchema)
+const userModel = mongoose.model('user', userSchema)
 
 export default userModel
