@@ -11,7 +11,7 @@ export default {
                 lastname
             },
             email,
-            password: await captainModel.hashPassword(password),
+            password,
             vehicle: {
                 capacity,
                 vehicleType,

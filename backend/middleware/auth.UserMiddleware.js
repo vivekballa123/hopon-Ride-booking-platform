@@ -1,16 +1,17 @@
 import userModel from "../models/user.model.js"
 import jwt from "jsonwebtoken"
 import bcrypt from "bcrypt"
+import BlacklistToken from "../models/blacklistToken.model.js"
 
 
-const authMiddleware = async (req, res, next) => {
+const authUserMiddleware = async (req, res, next) => {
     const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
      
      
     if (!token) {
         return res.status(401).json({ error: "Access denied. No token provided." });
     }
-    const isBlacklisted = await userModel.findOne({ token:token });
+    const isBlacklisted = await BlacklistToken.findOne({ token:token });
     if (isBlacklisted) {
         return res.status(401).json({ error: "Token has been blacklisted. Please log in again." });
     }
@@ -25,4 +26,4 @@ const authMiddleware = async (req, res, next) => {
     }
 }
 
-export default authMiddleware
+export default authUserMiddleware;
