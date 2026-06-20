@@ -1,34 +1,60 @@
- import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+ import React, { useContext, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { CaptainDataContext } from '../context/CaptainContext'
+import axios from 'axios'
 
 const CaptainSignup = () => {
 
+    const navigate = useNavigate()
     const [firstname, setFirstname] = useState('')
         const [lastname, setLastname] = useState('')
         const [email, setEmail] = useState('')
         const [password, setPassword] = useState('')
-        const [userData, setUserData] = useState({})
-    
-        const submitHandler = (e) => {
+         
+        const [vehicleColor, setVehicleColor] = useState('')
+        const [vehiclePlate, setVehiclePlate] = useState('')
+        const [vehicleCapacity, setVehicleCapacity] = useState('')
+        const [vehicleType, setVehicleType] = useState('')
+
+        const{captain,setCaptain} = useContext(CaptainDataContext)
+        const submitHandler =async (e) => {
             e.preventDefault()
     
-            const newUser = {
+            const captainData = {
                 fullname: {
                     firstname,
                     lastname
                 },
                 email,
-                password
+                password,
+                vehicle:{
+                    color:vehicleColor,
+                    plate:vehiclePlate,
+                    capacity:vehicleCapacity,
+                    vehicleType:vehicleType
+                }
             }
-    
-            setUserData(newUser)
-    
-            console.log(newUser)
+
+            
+            const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/captains/register`,captainData)
+
+            if (response.status === 201){
+                const data = response.data
+                setCaptain(data.captain)
+                localStorage.setItem('token',data.token)
+                navigate('/captain-home')
+            }
+
+            const data = axios
     
             setFirstname('')
             setLastname('')
             setEmail('')
             setPassword('')
+            setVehicleCapacity("")
+            setVehicleColor('')
+            setVehiclePlate('')
+            setVehicleType('')
         }
   return (
     <div>
@@ -90,6 +116,54 @@ const CaptainSignup = () => {
                         type="password"
                         placeholder="password"
                     />
+
+                    <h3 className='text-base font-medium mb-2'>
+                        Vehicle Information
+                    </h3>
+
+                    <div className='flex gap-4 mb-5'>
+                        <input
+                            value={vehicleColor}
+                            onChange={(e) => setVehicleColor(e.target.value)}
+                            className="w-1/2 bg-[#eeeeee] rounded px-4 py-2 text-base placeholder:text-sm"
+                            required
+                            type="text"
+                            placeholder="Vehicle Color"
+                        />
+
+                        <input
+                            value={vehiclePlate}
+                            onChange={(e) => setVehiclePlate(e.target.value)}
+                            className="w-1/2 bg-[#eeeeee] rounded px-4 py-2 text-base placeholder:text-sm"
+                            required
+                            type="text"
+                            placeholder="Vehicle Plate"
+                        />
+                    </div>
+
+                    <div className='flex gap-4 mb-5'>
+                        <input
+                            value={vehicleCapacity}
+                            onChange={(e) => setVehicleCapacity(e.target.value)}
+                            className="w-1/2 bg-[#eeeeee] rounded px-4 py-2 text-base placeholder:text-sm"
+                            required
+                            type="number"
+                            placeholder="Vehicle Capacity"
+                        />
+
+                        <select
+                            value={vehicleType}
+                            onChange={(e) => setVehicleType(e.target.value)}
+                            className="w-1/2 bg-[#eeeeee] rounded px-4 py-2 text-base"
+                            required
+                        >
+                            <option value="">Select Vehicle Type</option>
+                            <option value="car">Car</option>
+                            <option value="motorcycle">Motorcycle</option>
+                            <option value="auto">Auto</option>
+                            <option value="scooter">Scooter</option>
+                        </select>
+                    </div>
 
                     <button
                         type="submit"

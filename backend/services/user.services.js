@@ -12,7 +12,7 @@ export default {
                 lastname
             },
             email,
-            password: await userModel.hashPassword(password)
+            password: password,
         })
         return user;
     }}

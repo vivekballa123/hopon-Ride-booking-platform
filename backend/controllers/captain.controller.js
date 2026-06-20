@@ -20,7 +20,7 @@ export default {
         }
 
         const hashedPassword = await CaptainModel.hashPassword(password);
-        console.log("Hashed Password:", hashedPassword);
+         
         const captain = await captainService.createCaptain(
             fullname.firstname,
             fullname.lastname,

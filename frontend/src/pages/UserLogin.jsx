@@ -1,26 +1,56 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useContext, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import {UserDataContext} from '../context/UserContext'
 import { Eye, EyeOff } from 'lucide-react'
 
 const UserLogin = () => {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [showPassword, setShowPassword] = useState(false)
-    const [userData, setUserData] = useState({})
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
 
-    const submitHandler = (e) => {
-        e.preventDefault()
-        setUserData({
-            email:email,
-            password:password,
-        })
-         
+    const navigate = useNavigate();
+    const { user, setUser } = useContext(UserDataContext);
 
-        setEmail('')
-        setPassword('')
+    const submitHandler = async (e) => {
+        e.preventDefault();
+
+        setError('');
+
+        const userData = {
+            email,
+            password,
+        };
+
+        try {
+            const response = await axios.post(
+                `${import.meta.env.VITE_BASE_URL}/users/login`,
+                userData
+            );
+
+            if (response.status === 200) {
+                const data = response.data;
+
+                setUser(data.user);
+                localStorage.setItem('token', data.token);
+
+                navigate('/home');
+            }
+
+            setEmail('');
+            setPassword('');
+        } catch (err) {
+            setError(
+                err.response?.data?.error || 'Something went wrong'
+            );
+
+            setTimeout(() => {
+                setError('');
+            }, 3000);
+        }
+
     }
-
-  
 
     return (
         <div className='p-7 h-screen flex flex-col justify-between'>
@@ -73,7 +103,13 @@ const UserLogin = () => {
                             )}
                         </button>
                     </div>
-
+                    {error && (
+                        <div className="mb-4 animate-pulse rounded-lg border-l-4 border-red-600 bg-red-50 p-3">
+                            <p className="text-red-600 text-sm">
+                                {error}
+                            </p>
+                        </div>
+                    )}
                     <button
                         type="submit"
                         className='flex items-center justify-center w-full bg-black py-3 rounded mt-5 text-white'
