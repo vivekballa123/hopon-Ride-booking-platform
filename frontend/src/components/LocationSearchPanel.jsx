@@ -1,38 +1,47 @@
 import React from 'react'
 
 const LocationSearchPanel = (props) => {
-     
-    const locations=[
-         	"No. 8-2-120/112, 1st Floor, Park View Estate, Road No. 2, Banjara Hills, Hyderabad, Telangana 500034, India",
-            " 	Plot No.66, Rd Number 1, Park View Enclave, Jubilee Hills, Hyderabad, Telangana 500033, India",
-            "4th Floor, Fortune Atrium, Road No. 36, Jubilee Hills, opp. Chutneys, Hyderabad, Telangana 500033, India",
-            " 	12-13-1260, 1st Floor, Opp.Innova Hospital, Street Number 7, above Krishna Jewellers, Tarnaka, Hyderabad, Telangana 500017, India",
-            "Plot No.2, 1st floor, Krutika Layout Honda Showroom, Hitech City Rd, opp. Pride, Madhapur, Hyderabad, Telangana 500081, India",
-    ]
+    const suggestions = props.suggestions || [];
 
-  return (
-    <div className='overflow-scroll' >
-        {locations.map((location) => {
-            return (
-                <div key={location.id}>
-                    <div onClick={()=>{
-                        props.setVehiclePanel(true)
-                        props.setPanelOpen(false)
-                    }}  className='flex items-center mb-2 gap-4 active:border-black  border-2 p-3 rounded-xl  border-gray-200 ac justify-start'>
-                        <h2 className='bg-[#eee] p-2 rounded-full h-8 w-12 flex  items-center justify-center  '><i className="ri-map-pin-line"></i></h2>
-                        <h5 className='text-sm'>{location}</h5>
+    return (
+        <div className='overflow-scroll max-h-full'>
+            {props.isLoading && (
+                <p className='text-sm text-gray-500 py-2'>Loading suggestions...</p>
+            )}
+
+            {!props.isLoading && props.error && (
+                <p className='text-sm text-red-500 py-2'>{props.error}</p>
+            )}
+
+            {!props.isLoading && !props.error && suggestions.length === 0 && (
+                <p className='text-sm p-2 mt-4 text-gray-500 py-2'>Start typing to see nearby places.</p>
+            )}
+
+            {suggestions.map((suggestion, index) => {
+                const label = suggestion.description || suggestion.structured_formatting?.main_text || 'Unknown location';
+                const secondaryText = suggestion.structured_formatting?.secondary_text || '';
+
+                return (
+                    <div className='pt-5' key={suggestion.place_id || `${label}-${index}`}>
+                        <div 
+                            onClick={() => {
+                                props.onSuggestionSelect?.(suggestion, props.activeField);
+                            }}
+                            className='flex items-start mb-2 gap-4 active:border-black border-2 p-3 rounded-xl border-gray-200 justify-start'
+                        >
+                            <h2 className='bg-[#eee] p-2 rounded-full h-8 w-12 flex items-center justify-center'>
+                                <i className="ri-map-pin-line"></i>
+                            </h2>
+                            <div>
+                                <h5 className='text-sm'>{label}</h5>
+                                {secondaryText ? <p className='text-xs text-gray-500'>{secondaryText}</p> : null}
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-            );
-        })}
-         
-        
-         
-        
-         
-    </div>
-  )
+                );
+            })}
+        </div>
+    )
 }
 
 export default LocationSearchPanel

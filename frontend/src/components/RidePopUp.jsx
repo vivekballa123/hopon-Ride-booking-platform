@@ -1,19 +1,19 @@
 import React from 'react'
 
 const RidePopUp = (props) => {
-    const { setRidePopupPanel, setConfirmRidePopupPanel } = props
+    const { setRidePopupPanel,confirmRide, setConfirmRidePopupPanel,ride } = props
     return (
         <div>
-            <h5 onClick={() => {
+<h5 onClick={() => {
                 setRidePopupPanel(false)
             }} className=' w-[93%] p- text-center absolute top-0   '> <i className=" text-3xl text-gray-500 ri-arrow-down-wide-line"></i> </h5>
-            <h3 className='text-2xl font-semibold mb-2'>New Ride Available</h3>
+            <h3 className='text-2xl font-semibold mb-2'>New Ride Available</h3>            
             <div className='flex items-center justify-between mb-4 p-2 bg-amber-300 rounded-md'>
                 <div className='flex items-center gap-3 '>
                     <img className='h-10 w-10 rounded-full object-cover' src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRdlMd7stpWUCmjpfRjUsQ72xSWikidbgaI1w&s" alt="" />
-                    <h2 className='text-lg font-medium' >Vivek BAlla</h2>
+                    <h2 className='text-lg font-medium' >{ride?.user.fullname.firstname + " "+ride?.user.fullname.lastname}</h2>
                 </div>
-                <h5 className='text-lg font-semibold'>2.2KM</h5>
+                <h5 className='text-lg font-semibold'>{ride?.distanceText}</h5>
             </div>
             <div className='flex justify-between flex-col items-center '>
 
@@ -22,21 +22,21 @@ const RidePopUp = (props) => {
                     <div className='flex items-center -mt-3 border-b-2 border-gray-300  '>
                         <i className=" flex justify-center items-center p-4 ri-map-pin-2-line"></i>
                         <div>
-                            <h1 className='text-lg font-medium'>562/11/A</h1>
-                            <h5 className='text-sm text-gray-600'>Kaikondrahali, Hyderabad,Telangana</h5>
+                             
+                            <h5 className='text-lg text-gray-800'>{ride?.pickup}</h5>
                         </div>
                     </div>
-                    <div className='flex  border-b-2 border-gray-300 '>
+                    <div className='flex items-center border-b-2 border-gray-300 '>
                         <i className=" flex justify-center items-center p-4 ri-square-fill"></i>
                         <div>
-                            <h1 className='text-lg font-medium'>562/11/A</h1>
-                            <h5 className='text-sm text-gray-600'>Kaikondrahali, Hyderabad,Telangana</h5>
+                             
+                            <h5 className='text-lg font-medium text-gray-800'>{ride?.destination}</h5>
                         </div>
                     </div>
                     <div className='flex mb-4 '>
                         <i className=" flex justify-center items-center p-4 ri-currency-line"></i>
                         <div>
-                            <h1 className='text-lg font-medium'>₹193.30</h1>
+                            <h1 className='text-lg font-medium'>₹{ride?.fare}</h1>
                             <h5 className='text-sm text-gray-600'>Cash Cash</h5>
                         </div>
                     </div>
@@ -55,6 +55,7 @@ const RidePopUp = (props) => {
                         onClick={() => {
                             setConfirmRidePopupPanel(true)
                             setRidePopupPanel(false)
+                            confirmRide()
                         }}
                         className="flex-1 bg-green-700 text-white font-semibold p-2 rounded-lg"
                     >

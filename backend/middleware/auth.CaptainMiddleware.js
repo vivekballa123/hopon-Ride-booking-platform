@@ -5,6 +5,9 @@ import BlacklistToken from "../models/blacklistToken.model.js"
 
 const authCaptainMiddleware = async (req, res, next) => {
     const token = req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+    console.log("Received token:", token);
+    console.log("Authorization header:", req.header("Authorization"));
+    console.log("Cookie token:", req.cookies?.token);
     if (!token) {
         return res.status(401).json({ error: "Access denied. No token provided." });
     } 
@@ -19,7 +22,11 @@ const authCaptainMiddleware = async (req, res, next) => {
 
         return next();
     } catch (error) {
-        return res.status(401).json({ error: "Invalid token." });
+        console.log("JWT Verify Error:", error);
+        return res.status(401).json({
+            error: "Invalid token.",
+            details: error.message
+        });
     }
 }
 

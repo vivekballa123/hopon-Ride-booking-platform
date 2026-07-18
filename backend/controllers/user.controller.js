@@ -65,7 +65,7 @@ export default {
     getUserProfile: async (req, res) => {
         const userId = req.user._id;
         const user = await userModel.findById(userId).select("-password");
-        res.status(200).json({ user });
+        res.status(200).json(user);
     },
     logoutUser: async (req, res) => {
         res.clearCookie("token");

@@ -1,7 +1,7 @@
 import React from 'react'
 
 const VehiclePanel = (props) => {
-    const {setConfirmedRidePanel,setSelectedVehicle,selectedVehicle,setVehiclePanel} = props
+    const {setConfirmedRidePanel,setSelectedVehicle,selectVehicle,fare,selectedVehicle,setVehiclePanel} = props
   return (
     <div>
       <h5 onClick={()=>{
@@ -15,7 +15,8 @@ const VehiclePanel = (props) => {
                     onClick={() => {
                         setSelectedVehicle('ubergo');  
                         setConfirmedRidePanel(true);
-                        setVehiclePanel(false)
+                         
+                        selectVehicle('car')
                          
                     }}
                     className={`flex items-center rounded-2xl p-2 mb-2 justify-between cursor-pointer border-2 transition-all ${
@@ -38,13 +39,14 @@ const VehiclePanel = (props) => {
                         <p className='font-light text-xs'>Affordable, compact rides</p>
                     </div>
 
-                    <h2 className='text-lg font-semibold'>₹193</h2>
+                    <h2 className='text-lg font-semibold'>₹{fare?.car || 0}</h2>
                 </div>
 
                 {/* Moto */}
                 <div
                     onClick={() =>{
                         setSelectedVehicle('moto')
+                        selectVehicle('moto')
                         setConfirmedRidePanel(true);
                     }}
                     className={`flex items-center rounded-2xl p-2 mb-2 justify-between cursor-pointer border-2 transition-all ${
@@ -67,7 +69,7 @@ const VehiclePanel = (props) => {
                         <p className='font-light text-xs'>Affordable motorcycle ride</p>
                     </div>
 
-                    <h2 className='text-lg font-semibold'>₹65</h2>
+                    <h2 className='text-lg font-semibold'>₹{fare?.moto || 0}</h2>
                 </div>
 
                 {/* UberAuto */}
@@ -75,6 +77,7 @@ const VehiclePanel = (props) => {
                     onClick={() => {
                         setSelectedVehicle('auto')
                         setConfirmedRidePanel(true);
+                        selectVehicle('auto')
                     }}
                     className={`flex items-center rounded-2xl p-2 mb-1 justify-between cursor-pointer border-2 transition-all ${
                         selectedVehicle === 'auto'
@@ -96,7 +99,7 @@ const VehiclePanel = (props) => {
                         <p className='font-light text-xs'>Affordable Auto ride</p>
                     </div>
 
-                    <h2 className='text-lg font-semibold'>₹118.6</h2>
+                    <h2 className='text-lg font-semibold'>₹{fare?.auto || 0}</h2>
                 </div>
     </div>
   )

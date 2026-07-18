@@ -1,34 +1,49 @@
-import express from "express"
-import cors from "cors"
-import dotenv from "dotenv"
+import express from "express";
+import http from "http";
+import cors from "cors";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+
 import connectDB from "./db/db.js";
-import userRoutes from "./routes/user.routes.js"
-import cookieParser from "cookie-parser"
-import captainRoutes from "./routes/captain.routes.js"
+import userRoutes from "./routes/user.routes.js";
+import captainRoutes from "./routes/captain.routes.js";
+import mapRoutes from "./routes/maps.routes.js";
+import rideRoutes from "./routes/ride.routes.js";
+import { initializeSocket } from "./socket.js";
 
 dotenv.config();
 
-connectDB()
+connectDB();
 
-const app = express()
-//Middleware
+const app = express();
 
-app.use(cors())
-app.use(express.json())
-app.use(express.urlencoded({extended:true}))
-app.use(cookieParser())
+app.use(cors({
+    origin: ["http://localhost:5173", "https://jj9fcmzb-5173.inc1.devtunnels.ms/"],
+    credentials: true
+}));
 
-app.get("/",(req,res)=>{
-    res.send("hello worlds")
-})
-app.use("/users",userRoutes)
-app.use("/captains",captainRoutes)
-//port
-const PORT  = process.env.PORT || 5000
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
+app.get("/", (req, res) => {
+    res.send("Hello World");
+});
 
-//starting server
+app.use("/users", userRoutes);
+app.use("/captains", captainRoutes);
+app.use("/maps", mapRoutes);
+app.use("/rides", rideRoutes);
 
-app.listen(PORT,()=>{
-    console.log(`server is starting on port ${PORT}`)
-})
+const PORT = process.env.PORT || 5000;
+
+// Create HTTP server
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+await initializeSocket(server);
+
+// Start server
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
