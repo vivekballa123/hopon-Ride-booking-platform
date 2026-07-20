@@ -129,9 +129,12 @@ const CaptainHome = () => {
     return (
         <div className='h-screen'>
         <div className='fixed top-0 left-0 z-50 p-6 flex items-center justify-between w-full'>                <img className='w-16' src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png" alt="" />
-                <Link to='/captain-home' className=' h-10 w-10 bg-white flex items-center justify-center rounded-full'>
-                    <i className="text-lg font-medium ri-logout-box-r-line"></i>
-                </Link>
+                <Link
+    to="/captain-logout"
+    className="h-10 w-10 bg-white flex items-center justify-center rounded-full shadow-md"
+>
+    <i className="text-lg font-medium ri-logout-box-r-line"></i>
+</Link>
             </div>
             <div className='h-3/5'>
                 <LiveTraking/>

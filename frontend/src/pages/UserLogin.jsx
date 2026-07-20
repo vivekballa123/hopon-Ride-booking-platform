@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import {UserDataContext} from '../context/UserContext'
+import { UserDataContext } from '../context/UserContext'
 import { Eye, EyeOff } from 'lucide-react'
 
 const UserLogin = () => {
@@ -35,7 +35,7 @@ const UserLogin = () => {
                 setUser(data.user);
                 localStorage.setItem('token', data.token);
 
-                navigate('/home');
+                navigate('/home', { replace: true });
             }
 
             setEmail('');
@@ -61,7 +61,7 @@ const UserLogin = () => {
                     alt="Uber Logo"
                 />
 
-                <form onSubmit={(e)=>{
+                <form onSubmit={(e) => {
                     submitHandler(e)
                 }}>
                     <h3 className='text-lg font-medium mb-2'>

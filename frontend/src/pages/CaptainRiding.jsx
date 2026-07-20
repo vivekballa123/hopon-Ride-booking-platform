@@ -61,6 +61,7 @@ const CaptainRiding = () => {
                                 {Math.ceil(ride?.duration / 60)} mins
                             </span>
                         </div>
+                        <h1>Customer Loc: {ride.pickup}</h1>
                     </div>
 
                     {/* Button */}

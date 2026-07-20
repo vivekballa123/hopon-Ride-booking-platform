@@ -5,6 +5,7 @@ import axios from 'axios';
 const ConfirmRidePopUp = (props) => {
     const [otp, setOtp] = useState("");
     const [error, setError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { ride, setConfirmRidePopupPanel, setRidePopupPanel } = props;
 
@@ -13,7 +14,8 @@ const ConfirmRidePopUp = (props) => {
     const submitHander = async (e) => {
         e.preventDefault();
 
-        // Validation
+        if (isSubmitting) return;
+
         if (!otp.trim()) {
             setError("Please enter the OTP.");
             return;
@@ -21,15 +23,15 @@ const ConfirmRidePopUp = (props) => {
 
         try {
             setError("");
+            setIsSubmitting(true);
 
             const response = await axios.post(
                 `${import.meta.env.VITE_BASE_URL}/rides/start-ride`,
-                {},
                 {
-                    params: {
-                        rideId: ride._id,
-                        otp
-                    },
+                    rideId: ride?._id,
+                    otp
+                },
+                {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`
                     }
@@ -52,11 +54,13 @@ const ConfirmRidePopUp = (props) => {
                 err.response?.data?.message ||
                 "Invalid OTP. Please try again."
             );
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="h-[90%]">
+        <div className="h-full">
             <h5
                 onClick={() => setConfirmRidePopupPanel(false)}
                 className="w-[93%] text-center absolute top-0"
@@ -130,11 +134,10 @@ const ConfirmRidePopUp = (props) => {
                                 setOtp(e.target.value);
                                 setError("");
                             }}
-                            className={`bg-[#e6e4e4] pl-12 py-4 text-base rounded-lg w-full ${
-                                error
+                            className={`bg-[#e6e4e4] pl-12 py-4 text-base rounded-lg w-full ${error
                                     ? "border-2 border-red-500"
                                     : "border border-transparent"
-                            }`}
+                                }`}
                             placeholder="Enter OTP"
                         />
 
@@ -147,9 +150,10 @@ const ConfirmRidePopUp = (props) => {
 
                         <button
                             type="submit"
-                            className="w-full bg-green-700 text-white font-semibold p-3 rounded-lg mt-2 hover:bg-green-800 transition"
+                            disabled={isSubmitting}
+                            className="w-full bg-green-700 text-white font-semibold p-3 rounded-lg mt-2 hover:bg-green-800 transition disabled:opacity-70"
                         >
-                            Confirm
+                            {isSubmitting ? "Confirming..." : "Confirm"}
                         </button>
 
                         <button

@@ -1,19 +1,19 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { CaptainDataContext } from '../context/CaptainContext';
 import axios from 'axios';
 
 const CaptainProtectedWrapper = ({ children }) => {
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
+    const location = useLocation();
 
     const { setCaptain } = useContext(CaptainDataContext);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // No token → redirect to login
         if (!token) {
-            navigate('/captain-login');
+            navigate('/captain-login', { replace: true });
             return;
         }
 
@@ -36,12 +36,41 @@ const CaptainProtectedWrapper = ({ children }) => {
                 console.error(err);
 
                 localStorage.removeItem('token');
-                navigate('/captain-login');
+                navigate('/captain-login', { replace: true });
             }
         };
 
         fetchCaptainProfile();
     }, [token, navigate, setCaptain]);
+
+    useEffect(() => {
+        if (!token) return;
+
+        if (location.pathname === '/captain-login' || location.pathname === '/captain-signup') {
+            navigate('/captain-home', { replace: true });
+            return;
+        }
+
+        if (location.pathname === '/captain-home') {
+            window.history.pushState(null, '', window.location.href);
+        }
+    }, [token, location.pathname, navigate]);
+
+    useEffect(() => {
+        if (!token) return;
+
+        const handlePopState = () => {
+            window.history.pushState(null, '', window.location.href);
+            navigate('/captain-home', { replace: true });
+        };
+
+        window.history.pushState(null, '', window.location.href);
+        window.addEventListener('popstate', handlePopState);
+
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [token, navigate]);
 
     if (isLoading) {
         return (

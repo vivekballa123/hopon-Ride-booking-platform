@@ -112,7 +112,7 @@ const getFare = async (req, res) => {
     }
 
 };
-const confirmRide =async(req,res)=>{
+const confirmRide = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -136,13 +136,13 @@ const confirmRide =async(req,res)=>{
     }
 }
 
-const startRide = async(req,res)=>{
+const startRide = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { rideId, otp } = req.query;
+    const { rideId, otp } = req.body;
 
     try {
         const ride = await rideService.startRide({ rideId, otp, captain: req.captain });
@@ -159,7 +159,7 @@ const startRide = async(req,res)=>{
         return res.status(500).json({ message: err.message });
     }
 }
-const endRide = async (req,res) => {
+const endRide = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -180,7 +180,7 @@ const endRide = async (req,res) => {
         return res.status(200).json(ride);
     } catch (err) {
         return res.status(500).json({ message: err.message });
-    } 
+    }
 }
 export default {
     createRide,

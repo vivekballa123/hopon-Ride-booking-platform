@@ -35,7 +35,7 @@ const CaptainLogin = () => {
                 setCaptain(data.captain);
                 localStorage.setItem('token', data.token);
 
-                navigate('/captain-home');
+                navigate('/captain-home', { replace: true });
             }
 
             setEmail('');

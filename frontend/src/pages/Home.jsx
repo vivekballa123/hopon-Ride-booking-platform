@@ -381,17 +381,26 @@ const Home = () => {
                 className="w-18 absolute top-5 left-8 "
                 src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
                 alt=""
-            />            <button
-                onClick={handleLogout}
-                className="absolute top-5 right-5 z-50 bg-white rounded-full p-3 shadow-lg hover:bg-gray-100 transition"
-            >
-                <i className="ri-logout-box-r-line text-2xl"></i>
-            </button>
+            />
+            {!panelOpen &&
+                !vehiclePanel &&
+                !confirmedRidePanel &&
+                !vehicleFound &&
+                !waitingForDriver && (
+                    <button
+                        onClick={handleLogout}
+                        className="absolute top-5 right-5 z-50 bg-white rounded-full p-3 shadow-lg hover:bg-gray-100 transition"
+                    >
+                        <i className="ri-logout-box-r-line text-2xl"></i>
+                    </button>
+                )}
             <LiveTraking ride={ride} />
 
             <div className='h-screen flex flex-col justify-end top-0 absolute w-full  '>                <div className='h-[30%] p-5 relative bg-white'>
-                <h5 ref={panelCloseRef} onClick={closeLocationPanel} className=' absolute opacity-0 top-6 right-6 text-2xl '>
-                    <i className=" hover:cursor-pointer ri-arrow-down-wide-line"></i>
+                <h5 ref={panelCloseRef} onClick={() => {
+                    setPanelOpen(false)
+                }} className='absolute opacity-0 right-50 top-6 text-2xl'>
+                    <i className="ri-arrow-down-wide-line"></i>
                 </h5>
                 <h4 className='text-2xl font-semibold '>Get a ride</h4>
                 <form onSubmit={(e) => {
