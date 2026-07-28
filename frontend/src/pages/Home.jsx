@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react'
 import axios from 'axios';
 import { MapPin, Navigation } from 'lucide-react';
 import { useGSAP } from '@gsap/react';
+import hopon from "../assets/hopon.png";
 import gsap from 'gsap';
 import 'remixicon/fonts/remixicon.css'
 import LocationSearchPanel from '../components/LocationSearchPanel.jsx';
@@ -42,6 +43,53 @@ const Home = () => {
     const [vehicleType, setVehicleType] = useState(null);
     const [ride, setRide] = useState(null)
 
+    useEffect(() => {
+    const savedRide = localStorage.getItem("activeRide");
+    const savedStatus = localStorage.getItem("rideStatus");
+
+    if (!savedRide) return;
+
+    try {
+        const parsedRide = JSON.parse(savedRide);
+
+        if (savedStatus === "waiting-for-driver") {
+            setRide(parsedRide);
+
+            setPickup(parsedRide.pickup || "");
+            setDestination(parsedRide.destination || "");
+
+            if (parsedRide.vehicleType) {
+                setVehicleType(parsedRide.vehicleType);
+            }
+
+            setPanelOpen(false);
+            setVehiclePanel(false);
+            setConfirmedRidePanel(false);
+            setVehicleFound(false);
+
+            // IMPORTANT
+            setWaitingForDriver(true);
+
+            return;
+        }
+
+        if (savedStatus === "riding") {
+            navigate("/riding", {
+                replace: true,
+                state: {
+                    ride: parsedRide
+                }
+            });
+        }
+
+    } catch (error) {
+        console.error("Failed to restore ride:", error);
+
+        localStorage.removeItem("activeRide");
+        localStorage.removeItem("rideStatus");
+    }
+}, [navigate]);
+
     const submitHandler = (e) => {
         e.preventDefault()
     }
@@ -68,38 +116,64 @@ const Home = () => {
     }, [user, isConnected, sendMessage]);
 
     useEffect(() => {
-        const cleanup = receiveMessage("ride-confirmed", (ride) => {
-            console.log("Ride confirmed:", ride);
+    const cleanup = receiveMessage("ride-confirmed", (ride) => {
+        console.log("Ride confirmed:", ride);
 
-            setVehiclePanel(false);
-            setConfirmedRidePanel(false);
-            setVehicleFound(false);
-            setWaitingForDriver(true);
-            setRide(ride)
-        });
+        // SAVE RIDE
+        localStorage.setItem(
+            "activeRide",
+            JSON.stringify(ride)
+        );
 
-        return cleanup;
-    }, [receiveMessage]);
+        localStorage.setItem(
+            "rideStatus",
+            "waiting-for-driver"
+        );
+
+        setRide(ride);
+
+        setVehiclePanel(false);
+        setConfirmedRidePanel(false);
+        setVehicleFound(false);
+
+        setWaitingForDriver(true);
+    });
+
+    return cleanup;
+}, [receiveMessage]);
 
     useEffect(() => {
-        const cleanup = receiveMessage("ride-started", (ride) => {
+    const cleanup = receiveMessage(
+        "ride-started",
+        (ride) => {
             console.log("Ride started:", ride);
 
             setRide(ride);
-
-            // Hide waiting panel
             setWaitingForDriver(false);
 
-            // Navigate to riding page if needed
+            // Keep ride, but change its state
+            localStorage.setItem(
+                "activeRide",
+                JSON.stringify(ride)
+            );
+
+            localStorage.setItem(
+                "rideStatus",
+                "riding"
+            );
+
             navigate("/riding", {
+                replace: true,
                 state: {
                     ride
                 }
             });
-        });
+        }
+    );
 
-        return cleanup;
-    }, [receiveMessage, navigate]);
+    return cleanup;
+
+}, [receiveMessage, navigate]);
 
     const handleLogout = async () => {
         try {
@@ -209,28 +283,29 @@ const Home = () => {
     };
 
     const closeAllOverlayPanels = () => {
-        if (waitingForDriver) {
-            setWaitingForDriver(false);
-            return true;
-        }
 
-        if (confirmedRidePanel) {
-            setConfirmedRidePanel(false);
-            return true;
-        }
+    if (waitingForDriver) {
+        // Don't allow waiting screen to close
+        return true;
+    }
 
-        if (vehiclePanel) {
-            setVehiclePanel(false);
-            return true;
-        }
+    if (confirmedRidePanel) {
+        setConfirmedRidePanel(false);
+        return true;
+    }
 
-        if (panelOpen) {
-            closeLocationPanel();
-            return true;
-        }
+    if (vehiclePanel) {
+        setVehiclePanel(false);
+        return true;
+    }
 
-        return false;
-    };
+    if (panelOpen) {
+        closeLocationPanel();
+        return true;
+    }
+
+    return false;
+};
 
     useEffect(() => {
         if (!activeField) {
@@ -306,26 +381,40 @@ const Home = () => {
     }, [waitingForDriver]);
 
     useGSAP(() => {
-        if (panelOpen) {
-            gsap.to(panelRef.current, {
-                height: '70%',
-                opacity: 1,
-                padding: 24
-            });
-            gsap.to(panelCloseRef.current, {
-                opacity: 1
-            })
-        } else {
-            gsap.to(panelRef.current, {
-                height: '0%',
-                opacity: 0,
-                padding: 0
-            });
-            gsap.to(panelCloseRef.current, {
-                opacity: 0
-            })
-        }
-    }, [panelOpen]);
+
+    if (panelOpen) {
+
+        gsap.to(panelRef.current, {
+            height: "70vh",
+            opacity: 1,
+            padding: 24,
+            duration: 0.4,
+            ease: "power2.out"
+        });
+
+        gsap.to(panelCloseRef.current, {
+            opacity: 1,
+            duration: 0.3
+        });
+
+    } else {
+
+        gsap.to(panelRef.current, {
+            height: 0,
+            opacity: 0,
+            padding: 0,
+            duration: 0.4,
+            ease: "power2.inOut"
+        });
+
+        gsap.to(panelCloseRef.current, {
+            opacity: 0,
+            duration: 0.3
+        });
+
+    }
+
+}, [panelOpen]);
 
     useGSAP(() => {
         if (vehiclePanel) {
@@ -376,12 +465,17 @@ const Home = () => {
     }, [waitingForDriver])
 
     return (
-        <div className='relative h-screen'>
+        <div className="relative h-screen">
+
+            {/* Logo */}
             <img
-                className="w-18 absolute top-5 left-8 "
-                src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
-                alt=""
+                className="w-18 pt-8 absolute top-5 left-8 z-10"
+                src={hopon}
+                alt="HopOn"
             />
+
+
+            {/* Logout */}
             {!panelOpen &&
                 !vehiclePanel &&
                 !confirmedRidePanel &&
@@ -394,71 +488,152 @@ const Home = () => {
                         <i className="ri-logout-box-r-line text-2xl"></i>
                     </button>
                 )}
-            <LiveTraking ride={ride} />
 
-            <div className='h-screen flex flex-col justify-end top-0 absolute w-full  '>                <div className='h-[30%] p-5 relative bg-white'>
-                <h5 ref={panelCloseRef} onClick={() => {
-                    setPanelOpen(false)
-                }} className='absolute opacity-0 right-50 top-6 text-2xl'>
-                    <i className="ri-arrow-down-wide-line"></i>
-                </h5>
-                <h4 className='text-2xl font-semibold '>Get a ride</h4>
-                <form onSubmit={(e) => {
-                    submitHandler(e)
-                }} className="relative">
 
-                    {/* Vertical line connecting icons */}
-                    <div className="absolute left-[22px] top-[28px] h-[35px] w-[4px] bg-gray-800 rounded-full z-10"></div>
+            {/* ========================= */}
+            {/* MAP */}
+            {/* ========================= */}
 
-                    <div className="relative mt-5">
-                        <MapPin
-                            size={18}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-black  "
-                        />
-
-                        <input
-                            onFocus={() => handleFieldFocus('pickup')}
-                            onDoubleClick={(e) => e.currentTarget.select()}
-                            value={pickup}
-                            onChange={(e) => handleLocationInputChange(e.target.value, 'pickup')}
-                            className="bg-[#e6e4e4] pl-12 py-2 text-base rounded-lg w-full"
-                            type="text"
-                            placeholder="Add a pick-up location"
-                        />
-                    </div>
-
-                    <div className="relative mt-3">
-                        <Navigation
-                            size={18}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-black  "
-                        />
-
-                        <input
-                            onFocus={() => handleFieldFocus('destination')}
-                            onDoubleClick={(e) => e.currentTarget.select()}
-                            value={destination}
-                            onChange={(e) => handleLocationInputChange(e.target.value, 'destination')}
-                            className=" mb-3 bg-[#e6e4e4] pl-12 py-2 text-base rounded-lg w-full"
-                            type="text"
-                            placeholder="Enter your destination"
-                        />
-                    </div>
-
-                </form>
-                <button
-                    type="button"
-                    onClick={handleFindTrip}
-                    disabled={!canFindTrip}
-                    className={`w-full mb-2 py-3 rounded-lg font-semibold mt-4 transition ${canFindTrip
-                        ? 'bg-black text-white hover:bg-blue-600'
-                        : 'bg-gray-400 text-gray-100 cursor-not-allowed'
-                        }`}
-                >
-                    Find Trip
-                </button>
+            <div className="h-4/5 relative z-0">
+                <LiveTraking ride={ride} />
             </div>
-                <div ref={panelRef}
-                    className='h-0 opacity-0 bg-white overflow-hidden  '>
+
+
+            {/* ========================= */}
+            {/* GET RIDE + SEARCH PANEL */}
+            {/* ========================= */}
+
+            <div className="absolute bottom-0 left-0 w-full z-10">
+
+                {/* Get Ride */}
+                <div className="h-[30vh] p-5 relative bg-white">
+
+                    <h5
+                        ref={panelCloseRef}
+                        onClick={() => {
+                            setPanelOpen(false)
+                        }}
+                        className="absolute opacity-0 right-50 top-6 text-2xl"
+                    >
+                        <i className="ri-arrow-down-wide-line"></i>
+                    </h5>
+
+
+                    <h4 className="text-2xl font-semibold">
+                        Get a ride
+                    </h4>
+
+
+                    <form
+                        onSubmit={(e) => {
+                            submitHandler(e)
+                        }}
+                        className="relative"
+                    >
+
+                        {/* Vertical Line */}
+                        <div className="absolute left-[22px] top-[28px] h-[35px] w-[4px] bg-gray-800 rounded-full z-10"></div>
+
+
+                        {/* Pickup */}
+
+                        <div className="relative mt-5">
+
+                            <MapPin
+                                size={18}
+                                className="absolute left-4 top-1/2 -translate-y-1/2 text-black"
+                            />
+
+                            <input
+                                onFocus={() =>
+                                    handleFieldFocus("pickup")
+                                }
+                                onDoubleClick={(e) =>
+                                    e.currentTarget.select()
+                                }
+                                value={pickup}
+                                onChange={(e) =>
+                                    handleLocationInputChange(
+                                        e.target.value,
+                                        "pickup"
+                                    )
+                                }
+                                className="bg-[#e6e4e4] pl-12 py-2 text-base rounded-lg w-full"
+                                type="text"
+                                placeholder="Add a pick-up location"
+                            />
+
+                        </div>
+
+
+                        {/* Destination */}
+
+                        <div className="relative mt-3">
+
+                            <Navigation
+                                size={18}
+                                className="absolute left-4 top-1/2 -translate-y-1/2 text-black"
+                            />
+
+                            <input
+                                onFocus={() =>
+                                    handleFieldFocus("destination")
+                                }
+                                onDoubleClick={(e) =>
+                                    e.currentTarget.select()
+                                }
+                                value={destination}
+                                onChange={(e) =>
+                                    handleLocationInputChange(
+                                        e.target.value,
+                                        "destination"
+                                    )
+                                }
+                                className="mb-3 bg-[#e6e4e4] pl-12 py-2 text-base rounded-lg w-full"
+                                type="text"
+                                placeholder="Enter your destination"
+                            />
+
+                        </div>
+
+                    </form>
+
+
+                    {/* Find Trip */}
+
+                    <button
+                        type="button"
+                        onClick={handleFindTrip}
+                        disabled={!canFindTrip}
+                        className={`
+                    w-full
+                    mb-2
+                    py-3
+                    rounded-lg
+                    font-semibold
+                    mt-4
+                    transition
+
+                    ${canFindTrip
+                                ? "bg-black text-white hover:bg-blue-600"
+                                : "bg-gray-400 text-gray-100 cursor-not-allowed"
+                            }
+                `}
+                    >
+                        Find Trip
+                    </button>
+
+                </div>
+
+
+                {/* ========================= */}
+                {/* LOCATION SEARCH */}
+                {/* ========================= */}
+
+                <div
+                    ref={panelRef}
+                    className="h-0 opacity-0 bg-white overflow-hidden"
+                >
                     <LocationSearchPanel
                         activeField={activeField}
                         suggestions={suggestions}
@@ -468,10 +643,19 @@ const Home = () => {
                         setPanelOpen={setPanelOpen}
                     />
                 </div>
-            </div>
-            <div ref={vehiclePanelRef} className='fixed z-10 bottom-2    py-8 px-3 bg-white w-full'>
-                <VehiclePanel
 
+            </div>
+
+
+            {/* ========================= */}
+            {/* VEHICLE PANEL */}
+            {/* ========================= */}
+
+            <div
+                ref={vehiclePanelRef}
+                className="fixed z-20 bottom-2 py-8 px-3 bg-white w-full"
+            >
+                <VehiclePanel
                     setConfirmedRidePanel={setConfirmedRidePanel}
                     setSelectedVehicle={setSelectedVehicle}
                     selectedVehicle={selectedVehicle}
@@ -479,9 +663,17 @@ const Home = () => {
                     fare={fare}
                     selectVehicle={setVehicleType}
                 />
-
             </div>
-            <div ref={confirmedRidePanelRef} className='fixed z-10 bottom-0    py-6 px-3 pt-12 bg-white w-full'>
+
+
+            {/* ========================= */}
+            {/* CONFIRM RIDE */}
+            {/* ========================= */}
+
+            <div
+                ref={confirmedRidePanelRef}
+                className="fixed z-20 bottom-0 py-6 px-3 pt-12 bg-white w-full"
+            >
                 <ConfirmedRide
                     pickup={pickup}
                     destination={destination}
@@ -492,7 +684,16 @@ const Home = () => {
                     setConfirmedRidePanel={setConfirmedRidePanel}
                 />
             </div>
-            <div ref={vehicleFoundRef} className='fixed z-10 bottom-0     py-6 px-3 pt-12 bg-white w-full'>
+
+
+            {/* ========================= */}
+            {/* LOOKING FOR DRIVER */}
+            {/* ========================= */}
+
+            <div
+                ref={vehicleFoundRef}
+                className="fixed z-20 bottom-0 py-6 px-3 pt-12 bg-white w-full"
+            >
                 <LookingForDriver
                     pickup={pickup}
                     destination={destination}
@@ -503,14 +704,25 @@ const Home = () => {
                     setConfirmedRidePanel={setConfirmedRidePanel}
                 />
             </div>
-            <div ref={waitingForDriverRef} className='fixed z-10 bottom-0  translate-y-full  py-6 px-3 pt-12 bg-white w-full'>
+
+
+            {/* ========================= */}
+            {/* WAITING FOR DRIVER */}
+            {/* ========================= */}
+
+            <div
+                ref={waitingForDriverRef}
+                className="fixed z-20 bottom-0 translate-y-full py-6 px-3 pt-12 bg-white w-full"
+            >
                 <WaitingForDriver
                     ride={ride}
                     vehicleType={vehicleType}
                     setVehicleFound={setVehicleFound}
                     waitingForDriver={waitingForDriver}
-                    setWaitingForDriver={setWaitingForDriver} />
+                    setWaitingForDriver={setWaitingForDriver}
+                />
             </div>
+
         </div>
     )
 }

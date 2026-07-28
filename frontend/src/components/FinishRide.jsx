@@ -6,21 +6,35 @@ import { useNavigate } from 'react-router-dom'
 const FinishRide = (props) => {
     const {setFinishRidePanel,ride} = props
     const navigate = useNavigate()
-    const endRide =async () => {
-        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/rides/end-ride`, {
-
-            rideId: props.ride._id
-
-        }, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`
+    const endRide = async () => {
+    try {
+        const response = await axios.post(
+            `${import.meta.env.VITE_BASE_URL}/rides/end-ride`,
+            {
+                rideId: ride._id
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                }
             }
-        })
+        );
+
+        console.log("End ride response:", response);
 
         if (response.status === 200) {
-            navigate('/captain-home')
+            navigate("/captain-home", {
+                replace: true
+            });
         }
+
+    } catch (error) {
+        console.error(
+            "Error ending ride:",
+            error.response?.data || error.message
+        );
     }
+};
 
     return (
         <div>

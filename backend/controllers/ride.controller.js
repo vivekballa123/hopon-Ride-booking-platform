@@ -2,7 +2,8 @@ import rideService from '../services/ride.service.js';
 import { validationResult } from 'express-validator';
 import mapsService from '../services/maps.service.js';
 import captainModel from '../models/captain.model.js';
-import { sendMessageToSocketId } from '../socket.js';
+import { sendMessageToSocketId,
+    sendMessageToUser } from '../socket.js';
 import rideModel from '../models/ride.model.js';
 
 const createRide = async (req, res) => {
@@ -52,24 +53,40 @@ const createRide = async (req, res) => {
             .findById(ride._id)
             .populate("user");
 
-        // Send ride to all nearby captains
+        console.log("RIDE VEHICLE TYPE:", rideWithUser.vehicleType);
+        console.log("CAPTAINS FOUND:", captainsInRadius.length);
+
         captainsInRadius.forEach((captain) => {
 
-            console.log("Sending ride to:", captain.socketId);
+            console.log("----------------------");
+            console.log("Captain ID:", captain._id);
+            console.log("Captain vehicle:", captain.vehicle?.vehicleType);
+            console.log("Ride vehicle:", rideWithUser.vehicleType);
+            console.log("Socket ID:", captain.socketId);
 
-            sendMessageToSocketId(captain.socketId, {
-                event: "new-ride",
-                data: {
-                    ...rideWithUser.toObject(),
+            const isVehicleMatch =
+                captain.vehicle?.vehicleType === rideWithUser.vehicleType;
 
-                    distance: distanceTime.distance,
-                    duration: distanceTime.duration,
+            console.log("MATCH:", isVehicleMatch);
 
-                    distanceText: distanceTime.distanceText,
-                    durationText: distanceTime.durationText
-                }
-            });
+            if (isVehicleMatch && captain.socketId) {
 
+                console.log(
+                    "✅ Sending ride to matching captain:",
+                    captain.socketId
+                );
+
+                sendMessageToSocketId(captain.socketId, {
+                    event: "new-ride",
+                    data: {
+                        ...rideWithUser.toObject(),
+                        distance: distanceTime.distance,
+                        duration: distanceTime.duration,
+                        distanceText: distanceTime.distanceText,
+                        durationText: distanceTime.durationText
+                    }
+                });
+            }
         });
 
         return res.status(201).json({
@@ -168,16 +185,20 @@ const endRide = async (req, res) => {
     const { rideId } = req.body;
 
     try {
-        const ride = await rideService.endRide({ rideId, captain: req.captain });
+        const ride = await rideService.endRide({
+    rideId,
+    captain: req.captain
+});
 
-        sendMessageToSocketId(ride.user.socketId, {
-            event: 'ride-ended',
-            data: ride
-        })
+console.log("Ride completed:", ride._id);
+console.log("Sending ride-ended to user:", ride.user?._id);
 
+sendMessageToUser(ride.user._id.toString(), {
+    event: "ride-ended",
+    data: ride
+});
 
-
-        return res.status(200).json(ride);
+return res.status(200).json(ride);
     } catch (err) {
         return res.status(500).json({ message: err.message });
     }

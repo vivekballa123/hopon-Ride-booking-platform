@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { UserDataContext } from '../context/UserContext'
 import { Eye, EyeOff } from 'lucide-react'
+import hoponLogo from "../assets/hopon.png";
 
 const UserLogin = () => {
     const [email, setEmail] = useState('');
@@ -56,8 +57,8 @@ const UserLogin = () => {
         <div className='p-7 h-screen flex flex-col justify-between'>
             <div>
                 <img
-                    className='w-18 mb-10'
-                    src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
+                    className='h-9 mb-10'
+                    src={hoponLogo}
                     alt="Uber Logo"
                 />
 

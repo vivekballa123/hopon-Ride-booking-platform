@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { CaptainDataContext } from '../context/CaptainContext';
+import hoponLogo from "../assets/hoponrider.png";
 
 const CaptainLogin = () => {
     const [email, setEmail] = useState('');
@@ -55,8 +56,8 @@ const CaptainLogin = () => {
         <div className='p-7 h-screen flex flex-col justify-between'>
             <div>
                 <img
-                    className='w-18 mb-1'
-                    src='https://pngimg.com/uploads/uber/uber_PNG24.png'
+                    className='h-9 mb-5'
+                    src={hoponLogo}
                     alt='Uber Logo'
                 />
 

@@ -147,31 +147,34 @@ const startRide = async ({ rideId, otp, captain }) => {
     return ride;
 };
 const endRide = async ({ rideId, captain }) => {
+
     if (!rideId) {
-        throw new Error('Ride id is required');
+        throw new Error("Ride id is required");
     }
 
-    const ride = await rideModel.findOne({
-        _id: rideId,
-        captain: captain._id
-    }).populate('user').populate('captain').select('+otp');
+    const ride = await rideModel
+        .findOne({
+            _id: rideId,
+            captain: captain._id
+        })
+        .populate("user")
+        .populate("captain")
+        .select("+otp");
 
     if (!ride) {
-        throw new Error('Ride not found');
+        throw new Error("Ride not found");
     }
 
-    if (ride.status !== 'ongoing') {
-        throw new Error('Ride not ongoing');
+    if (ride.status !== "ongoing") {
+        throw new Error("Ride not ongoing");
     }
 
-    await rideModel.findOneAndUpdate({
-        _id: rideId
-    }, {
-        status: 'completed'
-    })
+    ride.status = "completed";
+
+    await ride.save();
 
     return ride;
-}
+};
 
 
 

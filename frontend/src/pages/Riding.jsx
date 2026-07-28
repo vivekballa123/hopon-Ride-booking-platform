@@ -6,19 +6,43 @@ import { useNavigate } from 'react-router-dom'
 import LiveTraking from '../components/LiveTraking'
 
 const Riding = () => {
-    const location = useLocation()
-    const ride = location.state?.ride
+    const location = useLocation();
+
+const savedRide = localStorage.getItem("activeRide");
+
+const ride =
+    location.state?.ride ||
+    (savedRide ? JSON.parse(savedRide) : null);
     const { receiveMessage } = useContext(SocketDataContext);
     const navigate = useNavigate()
 
-    useEffect(() => {
-      const cleanup = receiveMessage("ride-ended", (data) => {
-          console.log("✅ ride-ended received", data);
-          navigate("/home");
-      });
+    const handlePayment = () => {
+    // Clear completed ride data
+    localStorage.removeItem("activeRide");
+    localStorage.removeItem("rideStatus");
 
-      return cleanup;
-  }, [receiveMessage, navigate]);
+    // Go home
+    navigate("/home", {
+        replace: true
+    });
+};
+
+    useEffect(() => {
+    const cleanup = receiveMessage("ride-ended", (data) => {
+        console.log("✅ Ride ended by captain:", data);
+
+        // Remove persisted active ride
+        localStorage.removeItem("activeRide");
+        localStorage.removeItem("rideStatus");
+
+        // Rider goes back to home
+        navigate("/home", {
+            replace: true
+        });
+    });
+
+    return cleanup;
+}, [receiveMessage, navigate]);
 
     console.log("Ride Data:", ride)
     console.log("Vehicle Type:", ride?.vehicleType)
@@ -128,9 +152,12 @@ const Riding = () => {
 
                 </div>
 
-                <button className='w-full bg-green-700 text-white font-semibold p-3 rounded-lg mt-6'>
-                    Make a Payment
-                </button>
+                <button
+    onClick={handlePayment}
+    className="w-full bg-green-700 text-white font-semibold p-3 rounded-lg mt-6"
+>
+    Make a Payment
+</button>
 
             </div>
 

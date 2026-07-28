@@ -70,3 +70,27 @@ export function sendMessageToSocketId(socketId, messageObject = {}) {
 
     return true;
 }
+export function sendMessageToUser(userId, messageObject = {}) {
+    if (!ioInstance) {
+        console.error("Socket.IO is not initialized");
+        return false;
+    }
+
+    if (!userId) {
+        console.error("Cannot send message: userId missing");
+        return false;
+    }
+
+    const room = `user_${userId}`;
+
+    console.log(
+        `Sending ${messageObject.event} to ${room}`,
+        messageObject.data
+    );
+
+    ioInstance
+        .to(room)
+        .emit(messageObject.event, messageObject.data);
+
+    return true;
+}

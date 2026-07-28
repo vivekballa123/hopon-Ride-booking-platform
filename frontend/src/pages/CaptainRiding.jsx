@@ -39,7 +39,7 @@ const CaptainRiding = () => {
             </div>
 
             <div className='h-4/5'>
-                <LiveTraking/>
+                <LiveTraking ride = {ride}/>
             </div>
 
             <div className="h-1/5 bg-yellow-400 px-6 py-5 rounded-t-3xl shadow-lg">

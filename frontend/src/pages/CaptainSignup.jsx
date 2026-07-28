@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { CaptainDataContext } from '../context/CaptainContext'
 import axios from 'axios'
+import hoponLogo from "../assets/hoponrider.png";
 
 const CaptainSignup = () => {
 
@@ -61,8 +62,8 @@ const CaptainSignup = () => {
             <div className='py-5 px-5 h-screen flex flex-col justify-between'>
                 <div>
                     <img
-                        className='w-18 mb-1'
-                        src="https://pngimg.com/uploads/uber/uber_PNG24.png"
+                        className='w-30 mb-5'
+                        src={hoponLogo}
                         alt="Uber Logo"
                     />
 
@@ -159,9 +160,9 @@ const CaptainSignup = () => {
                             >
                                 <option value="">Select Vehicle Type</option>
                                 <option value="car">Car</option>
-                                <option value="motorcycle">Motorcycle</option>
+                                <option value="moto">Motorcycle</option>
                                 <option value="auto">Auto</option>
-                                <option value="scooter">Scooter</option>
+                                 
                             </select>
                         </div>
 

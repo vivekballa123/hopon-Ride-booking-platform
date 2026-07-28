@@ -2,6 +2,8 @@ import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { UserDataContext } from '../context/UserContext'
+import hoponLogo from "../assets/hopon.png";
+
 
 const UserSignup = () => {
     const [firstname, setFirstname] = useState('')
@@ -47,8 +49,8 @@ const UserSignup = () => {
         <div className='p-7 h-screen flex flex-col justify-between'>
             <div>
                 <img
-                    className='w-18 mb-10'
-                    src="https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.png"
+                    className='h-9 mb-10'
+                    src={hoponLogo}
                     alt="Uber Logo"
                 />
 
