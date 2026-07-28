@@ -10,7 +10,7 @@ export function initializeSocket(server) {
 
     ioInstance = new Server(server, {
         cors: {
-            origin: ["http://localhost:5173", "https://jj9fcmzb-5173.inc1.devtunnels.ms/"],
+            origin: ["http://localhost:5173", "https://hopon-backend-63qr.onrender.com"],
             methods: ["GET", "POST"],
             credentials: true,
         },
