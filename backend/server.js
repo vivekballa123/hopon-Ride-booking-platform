@@ -17,8 +17,14 @@ connectDB();
 
 const app = express();
 
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://hopon-frontend.onrender.com"
+];
+
 app.use(cors({
-    origin: ["http://localhost:5173", "https://jj9fcmzb-5173.inc1.devtunnels.ms/"],
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     credentials: true
 }));
 
