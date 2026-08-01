@@ -138,11 +138,11 @@ const CaptainHome = () => {
                     <i className="text-lg font-medium ri-logout-box-r-line"></i>
                 </Link>
             </div>
-            <div className='h-3/5'>
+            <div className='h-4/5'>
                 <LiveTraking />
 
             </div>
-            <div className='h-2/5  p-6'>
+            <div className='h-/5  p-6'>
                 <CaptainDetails />
             </div>
             <div ref={ridePopupPanelRef} className='fixed z-10 bottom-0  translate-y-full  py-6 px-3 pt-12 bg-white w-full'>

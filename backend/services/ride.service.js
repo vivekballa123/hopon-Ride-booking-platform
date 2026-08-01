@@ -39,7 +39,11 @@ async function getFare(pickup, destination) {
     const fare = {
         auto: Math.round(baseFare.auto + ((distanceTime.distance / 1000) * perKmRate.auto) + ((distanceTime.duration / 60) * perMinuteRate.auto)),
         car: Math.round(baseFare.car + ((distanceTime.distance / 1000) * perKmRate.car) + ((distanceTime.duration / 60) * perMinuteRate.car)),
-        moto: Math.round(baseFare.moto + ((distanceTime.distance / 1000) * perKmRate.moto) + ((distanceTime.duration / 60) * perMinuteRate.moto))
+        moto: Math.round(baseFare.moto + ((distanceTime.distance / 1000) * perKmRate.moto) + ((distanceTime.duration / 60) * perMinuteRate.moto)),
+        distanceText: distanceTime.distanceText,
+        durationText: distanceTime.durationText,
+        distance: distanceTime.distance,
+        duration: distanceTime.duration
     };
 
     return fare;
@@ -88,7 +92,7 @@ const createRide = async (rideData) => {
     return ride;
 };
 
-const confirmRide = async({ rideId, captain })=>{
+const confirmRide = async ({ rideId, captain }) => {
     if (!rideId) {
         throw new Error('Ride id is required');
     }
@@ -116,7 +120,7 @@ const startRide = async ({ rideId, otp, captain }) => {
     if (!rideId || !otp) {
         throw new Error("Ride id and OTP are required");
     }
-    
+
     const ride = await rideModel.findOne({
         _id: rideId
     })
@@ -178,4 +182,4 @@ const endRide = async ({ rideId, captain }) => {
 
 
 
-export default { confirmRide,createRide , getFare, getOtp,startRide,endRide };
+export default { confirmRide, createRide, getFare, getOtp, startRide, endRide };

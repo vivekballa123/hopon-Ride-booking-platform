@@ -17,7 +17,9 @@ const WaitingForDriver = (props) => {
     return (
         <div className="p-2 pb-2 pt-0">
 
-             
+             <h5 onClick={() => {
+        setWaitingForDriver(false)
+      }} className=' w-[93%] p- text-center absolute top-0   '> <i className=" text-3xl text-gray-500 ri-arrow-down-wide-line"></i> </h5>
 
 
             {/* Status */}

@@ -2,8 +2,10 @@ import rideService from '../services/ride.service.js';
 import { validationResult } from 'express-validator';
 import mapsService from '../services/maps.service.js';
 import captainModel from '../models/captain.model.js';
-import { sendMessageToSocketId,
-    sendMessageToUser } from '../socket.js';
+import {
+    sendMessageToSocketId,
+    sendMessageToUser
+} from '../socket.js';
 import rideModel from '../models/ride.model.js';
 
 const createRide = async (req, res) => {
@@ -140,10 +142,10 @@ const confirmRide = async (req, res) => {
     try {
         const ride = await rideService.confirmRide({ rideId, captain: req.captain });
 
-        sendMessageToSocketId(ride.user.socketId, {
+        sendMessageToUser(ride.user._id.toString(), {
             event: 'ride-confirmed',
             data: ride
-        })
+        });
 
         return res.status(200).json(ride);
     } catch (err) {
@@ -166,10 +168,10 @@ const startRide = async (req, res) => {
 
         console.log(ride);
 
-        sendMessageToSocketId(ride.user.socketId, {
+        sendMessageToUser(ride.user._id.toString(), {
             event: 'ride-started',
             data: ride
-        })
+        });
 
         return res.status(200).json(ride);
     } catch (err) {
@@ -186,19 +188,19 @@ const endRide = async (req, res) => {
 
     try {
         const ride = await rideService.endRide({
-    rideId,
-    captain: req.captain
-});
+            rideId,
+            captain: req.captain
+        });
 
-console.log("Ride completed:", ride._id);
-console.log("Sending ride-ended to user:", ride.user?._id);
+        console.log("Ride completed:", ride._id);
+        console.log("Sending ride-ended to user:", ride.user?._id);
 
-sendMessageToUser(ride.user._id.toString(), {
-    event: "ride-ended",
-    data: ride
-});
+        sendMessageToUser(ride.user._id.toString(), {
+            event: "ride-ended",
+            data: ride
+        });
 
-return res.status(200).json(ride);
+        return res.status(200).json(ride);
     } catch (err) {
         return res.status(500).json({ message: err.message });
     }

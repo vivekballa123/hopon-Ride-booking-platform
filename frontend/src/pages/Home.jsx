@@ -44,51 +44,51 @@ const Home = () => {
     const [ride, setRide] = useState(null)
 
     useEffect(() => {
-    const savedRide = localStorage.getItem("activeRide");
-    const savedStatus = localStorage.getItem("rideStatus");
+        const savedRide = localStorage.getItem("activeRide");
+        const savedStatus = localStorage.getItem("rideStatus");
 
-    if (!savedRide) return;
+        if (!savedRide) return;
 
-    try {
-        const parsedRide = JSON.parse(savedRide);
+        try {
+            const parsedRide = JSON.parse(savedRide);
 
-        if (savedStatus === "waiting-for-driver") {
-            setRide(parsedRide);
+            if (savedStatus === "waiting-for-driver") {
+                setRide(parsedRide);
 
-            setPickup(parsedRide.pickup || "");
-            setDestination(parsedRide.destination || "");
+                setPickup(parsedRide.pickup || "");
+                setDestination(parsedRide.destination || "");
 
-            if (parsedRide.vehicleType) {
-                setVehicleType(parsedRide.vehicleType);
+                if (parsedRide.vehicleType) {
+                    setVehicleType(parsedRide.vehicleType);
+                }
+
+                setPanelOpen(false);
+                setVehiclePanel(false);
+                setConfirmedRidePanel(false);
+                setVehicleFound(false);
+
+                // IMPORTANT
+                setWaitingForDriver(true);
+
+                return;
             }
 
-            setPanelOpen(false);
-            setVehiclePanel(false);
-            setConfirmedRidePanel(false);
-            setVehicleFound(false);
+            if (savedStatus === "riding") {
+                navigate("/riding", {
+                    replace: true,
+                    state: {
+                        ride: parsedRide
+                    }
+                });
+            }
 
-            // IMPORTANT
-            setWaitingForDriver(true);
+        } catch (error) {
+            console.error("Failed to restore ride:", error);
 
-            return;
+            localStorage.removeItem("activeRide");
+            localStorage.removeItem("rideStatus");
         }
-
-        if (savedStatus === "riding") {
-            navigate("/riding", {
-                replace: true,
-                state: {
-                    ride: parsedRide
-                }
-            });
-        }
-
-    } catch (error) {
-        console.error("Failed to restore ride:", error);
-
-        localStorage.removeItem("activeRide");
-        localStorage.removeItem("rideStatus");
-    }
-}, [navigate]);
+    }, [navigate]);
 
     const submitHandler = (e) => {
         e.preventDefault()
@@ -116,42 +116,10 @@ const Home = () => {
     }, [user, isConnected, sendMessage]);
 
     useEffect(() => {
-    const cleanup = receiveMessage("ride-confirmed", (ride) => {
-        console.log("Ride confirmed:", ride);
+        const cleanup = receiveMessage("ride-confirmed", (ride) => {
+            console.log("Ride confirmed:", ride);
 
-        // SAVE RIDE
-        localStorage.setItem(
-            "activeRide",
-            JSON.stringify(ride)
-        );
-
-        localStorage.setItem(
-            "rideStatus",
-            "waiting-for-driver"
-        );
-
-        setRide(ride);
-
-        setVehiclePanel(false);
-        setConfirmedRidePanel(false);
-        setVehicleFound(false);
-
-        setWaitingForDriver(true);
-    });
-
-    return cleanup;
-}, [receiveMessage]);
-
-    useEffect(() => {
-    const cleanup = receiveMessage(
-        "ride-started",
-        (ride) => {
-            console.log("Ride started:", ride);
-
-            setRide(ride);
-            setWaitingForDriver(false);
-
-            // Keep ride, but change its state
+            // SAVE RIDE
             localStorage.setItem(
                 "activeRide",
                 JSON.stringify(ride)
@@ -159,21 +127,53 @@ const Home = () => {
 
             localStorage.setItem(
                 "rideStatus",
-                "riding"
+                "waiting-for-driver"
             );
 
-            navigate("/riding", {
-                replace: true,
-                state: {
-                    ride
-                }
-            });
-        }
-    );
+            setRide(ride);
 
-    return cleanup;
+            setVehiclePanel(false);
+            setConfirmedRidePanel(false);
+            setVehicleFound(false);
 
-}, [receiveMessage, navigate]);
+            setWaitingForDriver(true);
+        });
+
+        return cleanup;
+    }, [receiveMessage]);
+
+    useEffect(() => {
+        const cleanup = receiveMessage(
+            "ride-started",
+            (ride) => {
+                console.log("Ride started:", ride);
+
+                setRide(ride);
+                setWaitingForDriver(false);
+
+                // Keep ride, but change its state
+                localStorage.setItem(
+                    "activeRide",
+                    JSON.stringify(ride)
+                );
+
+                localStorage.setItem(
+                    "rideStatus",
+                    "riding"
+                );
+
+                navigate("/riding", {
+                    replace: true,
+                    state: {
+                        ride
+                    }
+                });
+            }
+        );
+
+        return cleanup;
+
+    }, [receiveMessage, navigate]);
 
     const handleLogout = async () => {
         try {
@@ -284,28 +284,28 @@ const Home = () => {
 
     const closeAllOverlayPanels = () => {
 
-    if (waitingForDriver) {
-        // Don't allow waiting screen to close
-        return true;
-    }
+        if (waitingForDriver) {
+            // Don't allow waiting screen to close
+            return true;
+        }
 
-    if (confirmedRidePanel) {
-        setConfirmedRidePanel(false);
-        return true;
-    }
+        if (confirmedRidePanel) {
+            setConfirmedRidePanel(false);
+            return true;
+        }
 
-    if (vehiclePanel) {
-        setVehiclePanel(false);
-        return true;
-    }
+        if (vehiclePanel) {
+            setVehiclePanel(false);
+            return true;
+        }
 
-    if (panelOpen) {
-        closeLocationPanel();
-        return true;
-    }
+        if (panelOpen) {
+            closeLocationPanel();
+            return true;
+        }
 
-    return false;
-};
+        return false;
+    };
 
     useEffect(() => {
         if (!activeField) {
@@ -382,39 +382,39 @@ const Home = () => {
 
     useGSAP(() => {
 
-    if (panelOpen) {
+        if (panelOpen) {
 
-        gsap.to(panelRef.current, {
-            height: "70vh",
-            opacity: 1,
-            padding: 24,
-            duration: 0.4,
-            ease: "power2.out"
-        });
+            gsap.to(panelRef.current, {
+                height: "70vh",
+                opacity: 1,
+                padding: 24,
+                duration: 0.4,
+                ease: "power2.out"
+            });
 
-        gsap.to(panelCloseRef.current, {
-            opacity: 1,
-            duration: 0.3
-        });
+            gsap.to(panelCloseRef.current, {
+                opacity: 1,
+                duration: 0.3
+            });
 
-    } else {
+        } else {
 
-        gsap.to(panelRef.current, {
-            height: 0,
-            opacity: 0,
-            padding: 0,
-            duration: 0.4,
-            ease: "power2.inOut"
-        });
+            gsap.to(panelRef.current, {
+                height: 0,
+                opacity: 0,
+                padding: 0,
+                duration: 0.4,
+                ease: "power2.inOut"
+            });
 
-        gsap.to(panelCloseRef.current, {
-            opacity: 0,
-            duration: 0.3
-        });
+            gsap.to(panelCloseRef.current, {
+                opacity: 0,
+                duration: 0.3
+            });
 
-    }
+        }
 
-}, [panelOpen]);
+    }, [panelOpen]);
 
     useGSAP(() => {
         if (vehiclePanel) {
@@ -653,7 +653,7 @@ const Home = () => {
 
             <div
                 ref={vehiclePanelRef}
-                className="fixed z-20 bottom-2 py-8 px-3 bg-white w-full"
+                className="fixed z-20 bottom-2 translate-y-full py-8 px-3 bg-white w-full"
             >
                 <VehiclePanel
                     setConfirmedRidePanel={setConfirmedRidePanel}
@@ -672,7 +672,7 @@ const Home = () => {
 
             <div
                 ref={confirmedRidePanelRef}
-                className="fixed z-20 bottom-0 py-6 px-3 pt-12 bg-white w-full"
+                className="fixed z-20 bottom-0 translate-y-full py-6 px-3 pt-12 bg-white w-full"
             >
                 <ConfirmedRide
                     pickup={pickup}
@@ -692,7 +692,7 @@ const Home = () => {
 
             <div
                 ref={vehicleFoundRef}
-                className="fixed z-20 bottom-0 py-6 px-3 pt-12 bg-white w-full"
+                className="fixed z-20 bottom-0 translate-y-full py-6 px-3 pt-12 bg-white w-full"
             >
                 <LookingForDriver
                     pickup={pickup}
