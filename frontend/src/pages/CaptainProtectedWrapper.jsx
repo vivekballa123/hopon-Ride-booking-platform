@@ -74,10 +74,14 @@ const CaptainProtectedWrapper = ({ children }) => {
 
     if (isLoading) {
         return (
-            <div className="h-screen flex items-center justify-center">
-                Loading...
+        <div className="flex items-center justify-center h-screen bg-white">
+            <div className="flex gap-3">
+                <div className="w-4 h-4 rounded-full bg-black animate-bounce"></div>
+                <div className="w-4 h-4 rounded-full bg-black animate-bounce [animation-delay:150ms]"></div>
+                <div className="w-4 h-4 rounded-full bg-black animate-bounce [animation-delay:300ms]"></div>
             </div>
-        );
+        </div>
+    );
     }
 
     return <>{children}</>;
